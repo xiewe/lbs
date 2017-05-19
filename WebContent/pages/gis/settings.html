@@ -1,0 +1,506 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta charset="utf-8">
+<title>GIS</title>
+<link rel="stylesheet" type="text/css" href="css/magic-check.css">
+<style>
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.white-pink {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 500px;
+	background: #FFF;
+	padding: 30px 30px 20px 30px;
+	box-shadow: rgba(187, 187, 187, 1) 0 0px 20px -1px;
+	-webkit-box-shadow: rgba(187, 187, 187, 1) 0 0px 20px -1px;
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #666;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+}
+
+.white-pink h1 {
+	font: 24px "Trebuchet MS", Arial, Helvetica, sans-serif;
+	padding: 0px 0px 10px 40px;
+	display: block;
+	border-bottom: 1px solid #F5F5F5;
+	margin: -10px -30px 10px -30px;
+	color: #000000;
+}
+
+.white-pink h1>span {
+	display: block;
+	font-size: 12px;
+	color: blue;
+}
+
+.white-pink label {
+	display: block;
+	margin: 0px 0px 5px;
+}
+
+.white-pink label>span {
+	float: left;
+	width: 20%;
+	text-align: right;
+	padding-right: 10px;
+	margin-top: 10px;
+	color: #333;
+}
+
+.white-pink input[type="text"], .white-pink input[type="email"], .white-pink textarea, .white-pink select {
+	color: #555;
+	width: 70%;
+	padding: 3px 0px 3px 5px;
+	margin-top: 2px;
+	margin-right: 6px;
+	margin-bottom: 16px;
+	border: 1px solid #e5e5e5;
+	background: #fbfbfb;
+	height: 25px;
+	line-height: 15px;
+	outline: 0;
+	-webkit-box-shadow: inset 1px 1px 2px rgba(200, 200, 200, 0.2);
+	box-shadow: inset 1px 1px 2px rgba(200, 200, 200, 0.2);
+}
+
+.white-pink textarea {
+	height: 100px;
+	padding: 5px 0px 0px 5px;
+	width: 70%;
+}
+
+.white-pink .button {
+	-moz-box-shadow: inset 0px 1px 0px 0px #fbafe3;
+	-webkit-box-shadow: inset 0px 1px 0px 0px #fbafe3;
+	box-shadow: inset 0px 1px 0px 0px #fbafe3;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ff5bb0), color-stop(1, #ef027d));
+	background: -moz-linear-gradient(center top, #ff5bb0 5%, #ef027d 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff5bb0', endColorstr='#ef027d');
+	background-color: #ff5bb0;
+	border-radius: 9px;
+	-webkit-border-radius: 9px;
+	-moz-border-border-radius: 9px;
+	border: 1px solid #ee1eb5;
+	display: inline-block;
+	color: #ffffff;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: bold;
+	font-style: normal;
+	height: 40px;
+	line-height: 30px;
+	width: 100px;
+	text-decoration: none;
+	text-align: center;
+	text-shadow: 1px 1px 0px #c70067;
+}
+
+.white-pink .button:hover {
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ef027d), color-stop(1, #ff5bb0));
+	background: -moz-linear-gradient(center top, #ef027d 5%, #ff5bb0 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ef027d', endColorstr='#ff5bb0');
+	background-color: #ef027d;
+}
+
+.white-pink .button:active {
+	position: relative;
+	top: 1px;
+}
+
+.white-pink select {
+	background: url('down-arrow.png') no-repeat right, -moz-linear-gradient(top, #FBFBFB 0%, #E9E9E9 100%);
+	background: url('down-arrow.png') no-repeat right, -webkit-gradient(linear, left top, left bottom, color-stop(0%, #FBFBFB),
+		color-stop(100%, #E9E9E9));
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	text-indent: 0.01px;
+	text-overflow: '';
+	width: 70%;
+	line-height: 15px;
+	height: 30px;
+}
+
+.button_cancel {
+	background-color: #023F6E;
+	border: 2px solid #023F6E;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-border-radius: 6px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+	cursor: pointer;
+	margin: 10px 10px 0 0;
+	padding: 3px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: bold;
+	font-style: normal;
+	height: 40px;
+	line-height: 30px;
+	width: 100px;
+	text-decoration: none;
+	text-align: center;
+	cursor: pointer;
+	color: #ffffff;
+	font-size: 15px;
+	font-weight: bold;
+	font-style: normal;
+	height: 40px;
+	line-height: 30px;
+	width: 100px;
+	text-decoration: none;
+}
+
+.button_cancel:hover {
+	background-color: #5A9DD2;
+	border: 2px solid #5A9DD2;
+	background-color: #5A9DD2;
+	cursor: pointer;
+	background-color: #5A9DD2;
+}
+
+.button_submit {
+	background-color: #017BCE;
+	border: 2px solid #017BCE;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-border-radius: 6px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+	cursor: pointer;
+	margin: 10px 10px 0 0;
+	padding: 3px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: bold;
+	font-style: normal;
+	height: 40px;
+	line-height: 30px;
+	width: 100px;
+	text-decoration: none;
+	text-align: center;
+	cursor: pointer;
+	color: #ffffff;
+	font-size: 15px;
+	font-weight: bold;
+	font-style: normal;
+	height: 40px;
+	line-height: 30px;
+	width: 100px;
+	text-decoration: none;
+}
+
+.button_submit:hover {
+	background-color: #839BCC;
+	border: 2px solid #839BCC;
+	background-color: #839BCC;
+	cursor: pointer;
+	background-color: #839BCC;
+}
+</style>
+</head>
+<body>
+	<div id="settings">
+		<br />
+		<br />
+		<br />
+		<div class="white-pink">
+			<h1>
+				地图设置
+				<span>提示：跟据实际情况设置相关参数，有疑问请联系运维人员</span>
+			</h1>
+			<label>
+				<span>
+					本地加载地图
+					<span style="color: red">*</span>
+				</span>
+				<table>
+					<tr>
+						<td>
+							<input class="magic-radio" type="radio" name="useLocalResources" onclick="useLocalResources()" id="unuseLocalResources" value="0"
+								checked
+							>
+							<label for="unuseLocalResources">否</label>
+						</td>
+						<td>
+							<input class="magic-radio" type="radio" name="useLocalResources" onclick="useLocalResources()" id="useLocalResources" value="1">
+							<label for="useLocalResources">是</label>
+						</td>
+					</tr>
+					<tr></tr>
+				</table>
+			</label>
+			<label id="roadmapPath">
+				<span>
+					街道图路径
+					<span style="color: red">*</span>
+				</span>
+				<input id="roadmapUrl" name="roadmapUrl" type="text" maxlength="200" placeholder="您电脑上的街道地图存放路径" />
+			</label>
+			<label id="satellitePath">
+				<span>
+					卫星图路径
+					<span style="color: red">*</span>
+				</span>
+				<input id="satelliteUrl" name="satelliteUrl" type="text" maxlength="200" placeholder="您电脑上的卫星地图存放路径" />
+			</label>
+			<!-- <label> <span>中心点（经度）<span style="color: red">*</span></span>
+				<input id="centerLng" name="centerLng" type="text" maxlength="9"
+				placeholder="值范围（0-180），超出自动截断，保留5位小数" />
+			</label> <label> <span>中心点（纬度）<span style="color: red">*</span></span>
+				<input id="centerLat" name="centerLat" type="text" maxlength="8"
+				placeholder="值范围（0-90），超出自动截断，保留5位小数" />
+			</label> -->
+			<label>
+				<span>
+					地图最大级别
+					<span style="color: red">*</span>
+				</span>
+				<input id="maxZoom" name="maxZoom" type="text" maxlength="2" placeholder="值范围（1-21），与实际下载的地图最大级一致" />
+			</label>
+			<label>
+				<span>
+					地图最小级别
+					<span style="color: red">*</span>
+				</span>
+				<input id="minZoom" name="minZoom" type="text" maxlength="2" placeholder="值范围（1-21），与实际下载的地图最小级一致" />
+			</label>
+			<label>
+				<span>地图初始级别 </span>
+				<input id="initZoom" maxlength="2" name="initZoom" type="text" placeholder="可选，不填则默认加载最大级别" />
+			</label>
+			<label>
+				<span>地图类型 </span>
+				<table>
+					<tr>
+						<td>
+							<input class="magic-radio" type="radio" name="mapType" id="roadmap" value="1" checked>
+							<label for="roadmap">街道</label>
+						</td>
+						<td>
+							<input class="magic-radio" type="radio" name="mapType" id="satellite" value="2">
+							<label for="satellite">卫星</label>
+						</td>
+						<td>
+							<input class="magic-radio" type="radio" name="mapType" id="roadmap_satellite" value="3">
+							<label for="roadmap_satellite">街道 + 卫星</label>
+						</td>
+					</tr>
+				</table>
+			</label>
+			<label>
+				<span>&nbsp;</span>
+				<input type="button" onclick="submitSettings()" class="button_submit" value="提交" />
+				<input type="button" class="button_cancel" onclick="window.history.back();" value="取消" />
+			</label>
+			<label>
+				<span>&nbsp;</span>
+				<div id="errorTips" style="color: red;"></div>
+			</label>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">	
+	
+	$(function(){		
+ 		getRequestParam(); 		
+ 		initSettings();
+	});
+	
+	/**	
+	 * 初始化地图偏好设置
+	 */
+	function initSettings() {
+		$('#roadmapUrl').val(mapSettings.roadmapPath); 
+		$('#satelliteUrl').val(mapSettings.satellitePath); 
+		$('#maxZoom').val(mapSettings.maxZoom); 
+		$('#minZoom').val(mapSettings.minZoom); 
+		if(mapSettings.initZoom > 0)
+			$('#initZoom').val(mapSettings.initZoom); 
+		
+		if(mapSettings.useLocalResources == 0)
+			$("#unuseLocalResources").attr("checked","checked");
+		else
+			$("#useLocalResources").attr("checked","checked");
+		
+		switch(mapSettings.mapType)
+		{
+		case 1:
+			$("#roadmap").attr("checked","checked");
+			break;
+		case 2:
+			$("#satellite").attr("checked","checked");
+			break;
+		default:
+			$("#roadmap_satellite").attr("checked","checked");
+			break;
+		}
+		
+		useLocalResources();
+ 		$("input[name=useLocalResources]").click(function(){
+ 			useLocalResources();
+ 		});
+ 		$("input[name=mapType]").click(function(){
+ 			mapType();
+ 		});
+	}
+	
+	function useLocalResources(){		
+ 		switch($("input[name=useLocalResources]:checked").attr("id")){
+	  	case "useLocalResources":
+	  		mapType();
+   			break;
+  		default:
+   			$("#roadmapPath").hide();
+			$("#satellitePath").hide();
+   			break;
+ 		}
+	}
+	
+	function mapType(){
+		switch($("input[name=useLocalResources]:checked").attr("id")){
+	  	case "useLocalResources":
+	  		switch($("input[name=mapType]:checked").attr("id")){
+		  	case "roadmap":
+	   			$("#roadmapPath").show();
+				$("#satellitePath").hide();
+		  		break;
+		  	case "satellite":
+	   			$("#roadmapPath").hide();
+				$("#satellitePath").show();
+		  		break;
+		  	default:
+					$("#roadmapPath").show();
+					$("#satellitePath").show();
+	   			break;
+	 		}
+   			break;
+  		default:
+   			break;
+ 		}		
+	}
+	
+	function submitSettings() {
+		var errorTips = document.getElementById("errorTips");
+		//var centerLat = document.getElementById("centerLat").value;
+		//var centerLng = document.getElementById("centerLng").value;
+		var maxZoom = document.getElementById("maxZoom").value;
+		var minZoom = document.getElementById("minZoom").value;
+		var initZoom = document.getElementById("initZoom").value;
+  		var roadmapPath = document.getElementById("roadmapUrl").value;
+  		var satellitePath = document.getElementById("satelliteUrl").value;
+  		var mapType = $("input[name='mapType']:checked").val();//地图类型, 1-街道roadmap 2-卫星satellite 3-街道和卫星
+  		//是否从本地加载网页，本地加载网页js与服务端交互会有跨协议、跨域问题，需要特殊处理，0-服务端；1-本地加载
+  		var useLocalResources = $("input[name='useLocalResources']:checked").val();;
+		/* if (centerLng == '' || isNaN(centerLng) || centerLng < 0 || centerLng > 180) {
+			errorTips.innerHTML = '中心点（经度）值无效';
+			return;
+		}
+		if (centerLat == '' || isNaN(centerLat) || centerLat < 0 || centerLat > 90) {
+			errorTips.innerHTML = '中心点（纬度）值无效';
+			return;
+		} */
+		if (maxZoom == '' || isNaN(maxZoom) || maxZoom < 1 || maxZoom > 21) {
+			errorTips.innerHTML = '地图最大级别无效';
+			return;
+		}
+		if (minZoom == '' || isNaN(minZoom) || minZoom < 1 || minZoom > parseInt(maxZoom)) {
+			errorTips.innerHTML = '地图最小级别无效';
+			return;
+		}
+		if (initZoom != '' && (isNaN(initZoom) || initZoom < parseInt(minZoom) || initZoom > parseInt(maxZoom))) {
+			errorTips.innerHTML = '地图初始级别无效';
+			return;
+		}
+		
+		switch($("input[name=useLocalResources]:checked").attr("id")){
+	  	case "useLocalResources":
+	  		switch($("input[name=mapType]:checked").attr("id")){
+		  	case "roadmap":
+		  		if (roadmapPath == '') {
+					errorTips.innerHTML = '街道地图路径无效';
+					return;
+				}			
+		  		break;
+		  	case "satellite":
+		  		if (satellitePath == '') {
+					errorTips.innerHTML = '卫星地图路径无效';
+					return;
+				}
+		  		break;
+		  	default:
+		  		if (satellitePath == '') {
+					errorTips.innerHTML = '卫星地图路径无效';
+					return;
+				}
+			  	if (roadmapPath == '') {
+					errorTips.innerHTML = '街道地图路径无效';
+					return;
+				}
+	   			break;
+	 		}
+   			break;
+  		default:
+   			break;
+ 		}
+		
+		var dataJson = {};
+		dataJson.useLocalResources = useLocalResources;
+		dataJson.roadmapPath = roadmapPath.replace(/\\/g,'/');
+		dataJson.satellitePath = satellitePath.replace(/\\/g,'/');
+		dataJson.mapType = mapType;
+		dataJson.maxZoom = maxZoom;
+		dataJson.minZoom = minZoom;
+		dataJson.initZoom = initZoom;
+		
+		$.ajax({
+			type : "post",
+			url : (mapSettings.useLocalResources ? lbsHost : '') + "/lbs/r/lbs/map/settings/save",
+			data : {
+				"key":organization + owner,
+				"value" : JSON.stringify(dataJson)
+			},
+			// 本地加载与服务端加载，需要区分ajax调用方式，不能跨协议、跨域调用
+			dataType : useLocalResources ? 'jsonp' : 'json',
+			beforeSend : function() {
+
+			},
+			success : function(jsonData) {
+				/** 1成功 , 其它为失败值 */
+				if (jsonData.status == 1) {
+					//mapSettings = JSON.parse(jsonData.data); //由JSON字符串转换为JSON对象 ;
+					//mapSettings = $.parseJSON(jsonData.data);
+					mapSettings.useLocalResources =	 jsonData.data.useLocalResources;
+					mapSettings.roadmapPath = jsonData.data.roadmapPath;
+					mapSettings.satellitePath = jsonData.data.satellitePath;
+					mapSettings.mapType = jsonData.data.mapType;
+					mapSettings.maxZoom = jsonData.data.maxZoom;
+					mapSettings.minZoom = jsonData.data.minZoom;
+					mapSettings.initZoom = jsonData.data.initZoom;					
+					//调用JAVA代码绑定的JS涵数，重新设置Browser URL
+					nativeReloadBrowser('' + mapSettings.useLocalResources);
+					//self.location = "map.html";
+				} else {
+					alert(jsonData.msg);
+				}				
+			},
+			error : function(result) {
+				alert('[submitSettings]statusText is ' + result.statusText);
+			},
+			complete : function() {
+
+			}
+		});		
+	}
+		
+</script>
+</html>

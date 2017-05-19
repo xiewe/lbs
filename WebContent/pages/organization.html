@@ -1,0 +1,269 @@
+
+<div id="toolbar">
+	<a href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-add" plain="true" onclick="append()">新建</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-edit" plain="true" onclick="edit()">修改</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-remove" plain="true" onclick="removeIt()">删除</a> | <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-save" plain="true" onclick="save()">保存</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-cancel" plain="true" onclick="cancel()">取消</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-reload" plain="true" onclick="refreshTab()">刷新</a> | <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-filter" plain="true" onclick="expandAllOrg()">展开所有节点</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-sum"
+		plain="true" onclick="collapseAllOrg()">折叠所有节点</a>
+</div>
+
+<table id="tg" class="easyui-treegrid"
+	style="width: 100%; height: 94%; border-style: none;"
+	data-options="
+				iconCls: 'icon-ok',
+				rownumbers: true,
+				animate: true,
+				collapsible: true,
+				url: '/lbs/r/org/list',
+				method: 'post',
+				idField: 'id',
+				treeField: 'name'">
+	<thead>
+		<tr>
+			<th
+				data-options="field:'name',width:280,editor:'text',required:true,validType:'length[3,10]'">监控位置信息</th>
+			<th data-options="field:'remark',width:180,editor:'text'">描述</th>
+			<th data-options="field:'creator',width:100">创建者</th>
+			<th data-options="field:'owner',width:100">关联组织</th>
+			<th data-options="field:'timestamp',width:180,formatter:formatDay">最后修改时间</th>
+			<th data-options="field:'parentId',width:5,hidden:true">parentId</th>
+			<th data-options="field:'id',width:5,hidden:true">ID</th>
+		</tr>
+	</thead>
+</table>
+<script type="text/javascript">
+	var idIndex = 0;
+	var globalEditingId; //定义全局变量：当前编辑的行
+	var adding = false;
+	function edit() {
+		if (globalEditingId != undefined) {
+			$('#tg').treegrid('select', globalEditingId);
+			return;
+		}
+		
+		var row = $('#tg').treegrid('getSelected');
+		if (row) {
+			globalEditingId = row.id
+			$('#tg').treegrid('beginEdit', globalEditingId);
+		}
+	}
+	function getEditRow(datagridId) {//datagridId为table容器的id
+		var input = $('#' + datagridId).parent()
+				.find('div.treegrid-body input'), row;
+		if (input.size() > 0) {
+			var rows = $('#' + datagridId).treegrid('getRows'), rowIndex = input
+					.closest('tr[treegrid-row-index]').attr(
+							'treegrid-row-index');
+
+			alert(rowIndex)
+			row = rows[rowIndex];
+			console.log(row)
+		} else
+			alert('datagrid未处于编辑状态！');
+	}
+	function removeIt() {
+		var node = $('#tg').treegrid('getSelected');
+		if (node) {
+			$.messager.confirm('系统提示', node.name + ', 确定要删除码 ?', function(r) {
+				if (r) {
+					if(node.id == -1)
+					{
+						adding = false;
+						$('#tg').treegrid('remove', node.id);
+						return;
+					}
+					$.ajax({
+						type : "post",
+						url : "/lbs/r/org/del",
+						data : {
+							"id" : node.id
+						},
+						dataType : 'json',
+						beforeSend : function() {
+
+						},
+						success : function(result) {
+							$("#org_treegrid").treegrid('reload');
+							if (result.result == -1) {
+								$.messager.alert('系统消息', result.msg, 'error');
+							} else {
+								$('#tg').treegrid('remove', node.id);
+								$.messager.show({
+									title : '系统消息',
+									msg : '删除成功'
+								});
+							}
+						},
+						error : function(result) {
+							$.messager.alert('系统消息', '出错了!' + result.msg,
+									'error');
+						},
+						complete : function() {
+
+						}
+					});
+				}
+			});
+		}
+	}
+	function append() {
+		if (adding)
+			return;
+		idIndex++;
+		var node = $('#tg').treegrid('getSelected');
+		var parentid = null;
+		if (node != undefined) {
+			parentid = node.id;
+		}
+		
+		if(parentid < 0)
+			parentid = null;
+		$('#tg').treegrid('append', {
+			parent : parentid,
+			data : [ {
+				id : -1,
+				name : "新节点" + idIndex,
+				creator : visitor,
+				owner : owner,
+				parentId : parentid
+			} ]
+		});
+		globalEditingId = -1;
+		
+		$('#tg').treegrid('select', globalEditingId);
+		$('#tg').treegrid('beginEdit', globalEditingId);
+		adding = true;
+	}
+	function save() {
+		adding = false;
+		
+		if (globalEditingId != undefined) {
+			var t = $('#tg');
+			t.treegrid('endEdit', globalEditingId);
+			var node = $('#tg').treegrid('getSelected');
+			var editRow_id = globalEditingId;
+			var editRow_name;
+			var editRow_parentId;
+			var editRow_remark;
+		
+			//判断一下，若编辑行不是选中行，用户可能在编辑过程中用鼠标乱点，导致选中行与编辑行不一致
+			if (globalEditingId != node.id) {
+				var rows = t.treegrid('getChildren');
+				for (var i = 0; i < rows.length; i++) {
+					var p = parseInt(rows[i].id);
+					if (p == globalEditingId) {
+						editRow_name = rows[i].name;
+						editRow_parentId = rows[i].parentId;
+						editRow_remark = rows[i].remark;
+						break;
+					}
+				}
+			} else {
+				editRow_name = node.name;
+				editRow_parentId = node.parentId;
+				editRow_remark = node.remark;
+			}
+
+			globalEditingId = undefined;
+			$
+					.ajax({
+						type : "post",
+						url : "/lbs/r/org/append",
+						data : {
+							"name" : editRow_name,
+							"parentId" : editRow_parentId,
+							"id" : editRow_id,
+							"owner" : owner,
+							"remark" : editRow_remark,
+							"creator" : visitor
+						},
+						dataType : 'json',
+						beforeSend : function() {
+
+						},
+						success : function(result) {
+							if (result.result == -1) {
+								$.messager.alert('系统消息', result.msg, 'error');
+								refreshTab();
+								log('创建监控位置失败：' + result.msg);
+							} else {
+								$("#org_treegrid").treegrid('reload');
+								//若是根节点，刷新整个树
+								if (undefined == node.parentId
+										|| null == node.parentId) {
+									refreshTab();
+									log('保存监控位置成功(根节点)-->' + result.msg);
+								} else {
+									$('#tg').treegrid('update', {
+										id : node.id,
+										row : {
+											id : result.rows.id,
+											owner : result.rows.owner,
+											creator : result.rows.creator,
+											timestamp : result.rows.timestamp
+										}
+									});
+									log('保存监控位置成功-->' + result.msg);
+								}
+
+								$.messager.show({
+									title : '系统消息',
+									msg : '操作成功'
+								});
+							}
+						},
+						error : function(result) {
+							$.messager.alert('系统消息', result.msg, 'error');
+							log('保存监控位置异常-->' + result.msg);
+						},
+						complete : function() {
+
+						}
+					});
+		}
+	}
+	function cancel() {
+		if (adding) {
+			$('#tg').treegrid('remove', -1);
+			adding = false;
+		}
+
+		if (globalEditingId != undefined) {
+			$('#tg').treegrid('cancelEdit', globalEditingId);
+			globalEditingId = undefined;
+		}
+	}
+	function collapseAllOrg() {
+		$('#tg').treegrid('collapseAll');
+	}
+	function expandAllOrg() {
+		$('#tg').treegrid('expandAll');
+	}
+	//刷新当前标签Tabs
+	function refreshTab() {
+		//指向一个不存在节点，刷新默认不选中节点
+		$('#tg').treegrid('select', -1);
+		//重新加载treegrid的数据  
+		$("#tg").treegrid('reload');
+		globalEditingId = undefined;
+		adding = false;
+	}
+	function formatDay(date) {
+		if (null == date || undefined == date)
+			return "";
+		var unixTimestamp = new Date(date);
+		return unixTimestamp.toLocaleString();
+	}
+	
+</script>

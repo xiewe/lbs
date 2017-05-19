@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Access-Control-Allow-Origin" content="*" />
+<meta charset="utf-8">
+<title>GIS</title>
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="js/common-utils.js"></script>
+<script type="text/javascript" src="js/moment.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="mapfiles/mapapi.js"></script>
+<script type="text/javascript" src="js/maplabel-compiled.js"></script>
+<script type="text/javascript" src="js/markerwithlabel.js"></script>
+<script type="text/javascript" src="js/keydragzoom_packed.js"></script>
+<script type="text/javascript" src="js/infobubble.js"></script>
+<script type="text/javascript" src="js/mapapi.js"></script>
+<script type="text/javascript" src="js/custom-measure.js"></script>
+<script type="text/javascript" src="js/custom-marker.js"></script>
+<script type="text/javascript" src="js/test.js"></script>
+<style>
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.button_ok {
+	background-color: #fff;
+	border: 1px solid white;
+	border-radius: 3px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+	cursor: pointer;
+	margin: 10px;
+	text-align: center;
+	border: 1px solid white;
+}
+
+.button_menu {
+	background-color: #fff;
+	border: 1px solid white;
+	border-radius: 3px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+	cursor: pointer;
+	margin: 10px;
+	font-size: 18px;
+	font-weight: bold;
+	text-align: center;
+	font-weight: bold;
+}
+
+.button_action {
+	background-color: #023F6E;
+	border-radius: 9px;
+	-webkit-border-radius: 9px;
+	-moz-border-border-radius: 9px;
+	display: inline-block;
+	color: #ffffff;
+	font-family: Arial;
+	font-size: 16px;
+	font-weight: bold;
+	font-style: normal;
+	line-height: 50px;
+	margin: 0px 0px 10px 10px;
+	text-align: center;
+	width: 78px;
+}
+
+.button_action:hover {
+	background-color: #5A9DD2;
+	cursor: pointer;
+}
+
+.button_control {
+	background-color: #fff;
+	border: 2px solid #fff;
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-border-radius: 3px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+	cursor: pointer;
+	margin: 10px 10px 0 0;
+	padding: 3px;
+	text-align: center;
+	cursor: pointer;
+}
+
+.button_control:hover {
+	background-color: #5A9DD2;
+	border: 2px solid #5A9DD2;
+	background-color: #5A9DD2;
+	cursor: pointer;
+	background-color: #5A9DD2;
+}
+
+.measure_label {
+	color: red;
+	background-color: white;
+	font-family: "Lucida Grande", "Arial", sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+	padding: 0px 0.2em 0px 0.2em;
+	border: 1px solid black;
+	white-space: nowrap;
+}
+
+.button_error {
+	background-color: #E33327;
+	border-radius: 9px;
+	-webkit-border-radius: 9px;
+	-moz-border-border-radius: 9px;
+	display: inline-block;
+	color: #ffffff;
+	font-family: Arial;
+	font-size: 16px;
+	font-weight: bold;
+	font-style: normal;
+	line-height: 50px;
+	margin: 0px 0px 10px 10px;
+	text-align: center;
+	padding: 0px 10px 0px 10px;
+}
+
+#googlemap {
+	height: 100%;
+}
+</style>
+</head>
+<body>
+	<div id="googlemap"></div>
+</body>
+<script>
+	$(function() {
+		preCreateGoogleMap();
+	});
+	//google.maps.event.addDomListener(window, 'load', preCreateGoogleMap);
+</script>
+</html>

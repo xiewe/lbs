@@ -1,0 +1,74 @@
+ LBS（Location Based Service，基于位置服务，缩写：LBS）使用步骤:
+ 
+【特别提醒】升级时请不要直接将老的lbs版本重命名放在webapps目录，这样会直接导致服务不可用！
+
+1、将应用包lbs-x.x.x.zip（例：lbs-3.1.0.zip）文件复制到SDC所在机器Tomcat服务webapps目录下;
+
+2、解压缩需要使用的地图资源包,并复制到 lbs/pages/map/目录下，
+如果是街道图，放置在roadmap下
+如果是卫星图，放置在overlay和satellite下
+
+  完成后目录结构如下：
+ ../lbs/pages/map/roadmap
+   |-1
+   |-2
+   |-3
+   | ..
+   |
+   |-18
+   |-19
+   | ..	
+   
+
+ ../lbs/pages/map/overlay
+   |-1
+   |-2
+   |-3
+   | ..
+   |
+   |-18
+   |-19
+   | ..	
+   
+ ../lbs/pages/map/satellite
+   |-1
+   |-2
+   |-3
+   | ..
+   |
+   |-18
+   |-19
+   | ..	
+
+3、修改地图默认缩放等级和默认中心位置
+  打开lbs/pages/map/conf.txt，
+  根据需要修改如下参数：
+  
+// 修改项
+history_time_max = 600;//unit:second  历史轨迹时，超过该时间时从新画线，单位是秒
+history_distance_max = 600;//unit:meter 历史轨迹时，超过该距离时从新画线，单位是米
+maxZoom=18;//    map max zoom   地图缩放最大级别
+minZoom=5;//     map min zoom   地图缩放最小级别
+initZoom=16;//   map init zoom  地图缩放初始级别
+initCenterLatitude=22.51118;  // map init center lat   地图缩放初始中心的纬度
+initCenterLongitude=113.92505;// map init center lng    地图缩放初始中心的经度
+mapType=1;// map type,1:road map;2:satellite map;3:both. 1、街道 2、卫星 3、roadmap和卫星
+roadMapName="街道";//road display name,character encoding:UTF-8     街道
+satelliteName="卫星";//satellite display name,character encoding:UTF-8 卫星
+
+4、默认布署环境为linux，若为window环境，磁盘路径不一样，需要再修改一项：lbs/WEB-INF/classes/jdbc.properties
+将这行：jdbc.url=jdbc:derby:/usr/xinwei/GDC-DB;create=true;
+改成：    jdbc.url=jdbc:derby:D:/usr/xinwei/GDC-DB;create=true;
+
+5、GDC需要使用LBS时，启动Tomcat服务即可
+
+6、测试
+在浏览器中打开网址：http://服务器IP:端口/lbs/pages/map/index.html
+例：http://127.0.0.1:8080/lbs/pages/map/index.html
+
+【注意】
+若无法访问，可查看启动日志，可能的原因是tomcat分配的内存太小
+需要修改：/usr/xinwei/wireless/apache-tomcat-6.0.37/bin目录下的catalina.sh文件
+在 # OS specific support.  $var _must_ be set to either true or false.所在行下方增加一行，添加内容：
+JAVA_OPTS="-Dfile.encoding=UTF-8 -Xms128m -Xmx1024m -XX:PermSize=64m -XX:MaxPermSize=256m"
+

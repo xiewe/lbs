@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>信威LBS</title>
+<link rel="stylesheet" type="text/css"
+	href="themes/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css"
+	href="themes/easyui/themes/icon.css">
+<link rel="stylesheet" type="text/css"
+	href="themes/easyui/demo/demo.css">
+<script type="text/javascript" src="themes/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="themes/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="themes/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body class="easyui-layout">
+	<div
+		data-options="region:'west',split:true,hideCollapsedContent:false,title:'监控管理'"
+		style="width: 100px;">
+		<div style="padding: 15px;">
+			<a href="javascript:void(0)"
+				onclick="addPanel('监控位置','organization.html')" id="openOrg"
+				class="easyui-linkbutton"
+				data-options="iconCls:'icon-large-clipart',size:'large',iconAlign:'top'">监控位置</a>
+			<a href="javascript:void(0)" onclick="addPanel('IPC 配置','ipc.html')"
+				class="easyui-linkbutton"
+				data-options="iconCls:'icon-large-smartart',size:'large',iconAlign:'top'"
+				style="margin-top: 10px;">IPC 配置</a>
+		</div>
+	</div>
+	<div id="tt"
+		data-options="region:'center',hideCollapsedContent:true,tools:'#tab-tools'"
+		class="easyui-tabs"
+		style="width: 100%; height: 100%; border-style: none;"></div>
+	<div id="tab-tools">
+		<!-- <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'" onclick="addPanel('New Tab')"></a> -->
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			data-options="plain:true,iconCls:'icon-cancel'"
+			onclick="removePanel()"></a>
+	</div>
+	<!-- 右键菜单 -->
+	<div id="mm" class="easyui-menu" data-options="onClick:menuHandler"
+		style="width: 120px;">
+		<div data-options="name:'new'">New</div>
+		<div data-options="name:'save',iconCls:'icon-save'">Save</div>
+		<div data-options="name:'print',iconCls:'icon-print'">Print</div>
+		<div class="menu-sep"></div>
+		<div data-options="name:'exit'">Exit</div>
+	</div>
+	<!-- 右键菜单 END-->
+	<script type="text/javascript">
+		var visitor = 'guest'; // 登录用户名
+		var owner = 'szxw'; // 所属组织
+		function menuHandler(item) {
+			$('#log').prepend('<p>Click Item: ' + item.name + '</p>');
+		}
+		
+		//记录操作日志
+		function log(log){
+			$.ajax({
+				type : "post",
+				url : "/lbs/r/lbs/log",
+				data : {"log" : log},
+				dataType : 'json'
+			});
+		}
+		
+		$(function() {
+
+			$(document).bind('contextmenu', function(e) {
+				e.preventDefault();
+				return false;
+				/*右键菜单，屏蔽
+				$('#mm').menu('show', {
+					left: e.pageX,
+					top: e.pageY
+				});*/
+			});
+			log('开始初始化监控组织与IPC信息...');
+			$("#openOrg").click();
+		});
+		var index = 0;
+		function addPanel(title, url) {
+			if ($('#tt').tabs('exists', title)) {
+				$('#tt').tabs('select', title);
+			} else {
+				index++;
+				$('#tt').tabs('add', {
+					title : title,
+					href : url,
+					//content: '<div style="padding:10px">Tab Content ... </div>',
+					closable : true
+				});
+			}
+		}
+		function removePanel() {
+			var tab = $('#tt').tabs('getSelected');
+			if (tab) {
+				var index = $('#tt').tabs('getTabIndex', tab);
+				$('#tt').tabs('close', index);
+			}
+		}
+
+		function getQueryString(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null)
+				return unescape(r[2]);
+			return null;
+		}
+
+		// 采用正则表达式获取地址栏参数
+		function GetQueryString(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null)
+				return unescape(r[2]);
+			return null;
+		}
+
+		// 获取请求参数，登录用户名、组织
+		var requestVisitor = GetQueryString("visitor");
+		if (null != requestVisitor)
+			visitor = requestVisitor;
+		var requestOwner = GetQueryString("owner");
+		if (null != requestOwner)
+			owner = requestOwner;
+		
+		log('获取的请求参数，visitor:' + visitor + ',owner:' + owner);
+		
+	</script>
+</body>
+</html>

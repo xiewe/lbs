@@ -1,0 +1,546 @@
+
+<div id="toolbar">
+	<a href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-filter" plain="true" onclick="expandAll()">展开所有</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-sum"
+		plain="true" onclick="collapseAll()">折叠所有</a> <a
+		href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-reload" plain="true" onclick="refreshTree()">刷新</a>
+</div>
+<div class="easyui-layout"
+	style="width: 100%; height: 94%; border-style: none;">
+	<div id="p" data-options="region:'west',tools:'#org_tools'"
+		title="监控位置（<font color=red>选中节点，点 + 号配置IPC</font>）"
+		style="width: 25%; border-style: none;">
+		<table id="org_treegrid" class="easyui-treegrid"
+			style="width: 100%; height: 100%; border-style: none;"
+			data-options="
+						iconCls: 'icon-ok',
+						rownumbers: true,
+						animate: true,
+						collapsible: true,
+						url: '/lbs/r/org/list',
+						method: 'post',
+						idField: 'id',
+						treeField: 'name'">
+			<thead>
+				<tr>
+					<th data-options="field:'name',width:280">监控位置</th>
+					<th data-options="field:'owner',hidden:true">关联组织（核心网配置的组织）</th>
+					<th data-options="field:'id',hidden:true">ID</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div data-options="region:'center',tools:'#ipc_tools'"
+		title="IPC信息" style="border-style: none;">
+		<table id="dg" style="width: 100%; height: 100%; border-style: none;"
+			data-options="
+					rownumbers:true,
+					pagination:true,
+					singleSelect:true,
+					method:'post'">
+			<thead>
+				<tr>
+					<th data-options="field:'ck',checkbox:true,width:30"></th>
+					<th data-options="field:'id',hidden:true">ID</th>
+					<th data-options="field:'name',width:100">监控名称</th>
+					<th data-options="field:'udn',width:100">监控号码</th>
+					<th data-options="field:'orgid',align:'right',hidden:true">隶属组织ID</th>
+					<th data-options="field:'orgName',align:'right',width:80">监控位置</th>
+					<th data-options="field:'owner',align:'right',width:80">关联组织</th>
+					<th data-options="field:'longitude',align:'right',width:100">经度</th>
+					<th data-options="field:'latitude',align:'right',width:100">纬度</th>
+					<th data-options="field:'gpsType',align:'right',width:60"
+						formatter="formatterGpsType">位置</th>
+					<th data-options="field:'voiceUploadFlag',align:'center',width:60"
+						formatter="formatterYesNo">语音上传</th>
+					<th data-options="field:'voicePlayFlag',align:'center',width:60"
+						formatter="formatterYesNo">语音播放</th>
+					<th data-options="field:'ptzFlag',align:'center',width:60"
+						formatter="formatterYesNo">云台控制</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+</div>
+
+<div id="org_tools">
+	<a href="javascript:void(0)" class="icon-add" title="IPC配置"
+		onclick="configIpc()"></a>
+</div>
+<div id="ipc_tools">
+	<!-- <a href="javascript:void(0)" class="icon-add" title="新建IPC" onclick="javascript:newIpc()"></a>  -->
+	<a href="javascript:void(0)" class="icon-edit" title="修改IPC" onclick="javascript:loadFormData()"></a>
+	<!-- <a href="javascript:void(0)" class="icon-remove" title="删除IPC" onclick="javascript:delIpc()"></a> --> 
+	<a href="javascript:void(0)" class="icon-undo" title="移除组织信息" onclick="javascript:undoIpc()"></a>
+	<!-- <a href="javascript:void(0)" class="icon-help" onclick="javascript:alert('help')"></a> -->
+</div>
+
+<!-- IPC信息维护 BEGIN -->
+<div id="dlg" class="easyui-dialog"
+	style="width: 600px; margin: 0; padding: 10px 40px; overflow: hidden;"
+	closed="true" buttons="#dlg-buttons">
+	<div
+		style="margin-bottom: 20px; font-size: 14px; border-bottom: 1px solid #ccc">IPC信息</div>
+	<form id="my_form" method="post">
+		<input type="hidden" id="ipcid" name="ipcid"> <input
+			type="hidden" id="orgid" name="orgid"> <input type="hidden"
+			id="owner" name="owner">
+		<div style="margin-bottom: 10px">
+			<input id="name" name="name" class="easyui-textbox validatebox"
+				data-options="prompt:'给摄像头起个名字，便于记忆与识别（2-10字符）',label:'监控名称:',required:true,validType:'length[2,10]'"
+				style="width: 98%">
+		</div>
+		<div style="margin-bottom: 10px">
+			<input id="udn" name="udn" class="easyui-textbox validatebox"
+				data-options="prompt:'输入UDN，2-11位数字',required:true,validType:'udn'"
+				label="监控号码:" style="width: 98%">
+		</div>
+		<div style="margin-bottom: 10px">
+			<input id="longitude" name="longitude"
+				data-options="prompt:'有效值范围（0-180），超出自动截断，保留5位小数'"
+				class="easyui-numberbox" precision="5" min="0" max="180"
+				required="true" label="经度(0-180):" style="width: 98%">
+		</div>
+		<div style="margin-bottom: 10px">
+			<input id="latitude" name="latitude"
+				data-options="prompt:'有效值范围（0-90），超出自动截断，保留5位小数'"
+				class="easyui-numberbox" precision="5" min="0" max="90"
+				required="true" label="纬度(0-90):" style="width: 98%">
+		</div>
+		<div style="margin-bottom: 10px">
+			<table>
+				<tr style="text-align: right;">
+					<td style="width: 180px;">位置:</td>
+					<td><input id="gpsType" name="gpsType"
+						data-options="onText:'移动',offText:'固定'"
+						class="easyui-switchbutton" /></td>
+					<td style="width: 180px;">云台控制:</td>
+					<td><input id="ptzFlag" name="ptzFlag"
+						data-options="onText:'是',offText:'否'" class="easyui-switchbutton" /></td>
+				</tr>
+				<tr style="text-align: right;">
+					<td style="width: 180px">语音上传:</td>
+					<td><input id="voiceUploadFlag" name="voiceUploadFlag"
+						data-options="onText:'是',offText:'否'" class="easyui-switchbutton" /></td>
+					<td style="width: 180px;">语音播放:</td>
+					<td><input id="voicePlayFlag" name="voicePlayFlag"
+						data-options="onText:'是',offText:'否'" class="easyui-switchbutton" /></td>
+				</tr>
+			</table>
+		</div>
+	</form>
+</div>
+<div id="dlg-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton c6"
+		iconCls="icon-ok" onclick="saveOrUpdate()" style="width: 90px">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')"
+		style="width: 90px">取消</a>
+</div>
+<!-- IPC信息维护 END -->
+
+<!-- 配置IPC BEGIN -->
+<div id="config_dialog" class="easyui-dialog"
+	style="width: 800px; overflow: hidden;" closed="true"
+	buttons="#config_dlg-buttons">
+	<table id="config_dg" class="easyui-datagrid"
+		style="width: 100%; height: 308px; border-style: none;"
+		data-options="rownumbers:true,
+					pagination:true, 
+					singleSelect:true,
+					method:'post'">
+		<thead>
+			<tr>
+				<th data-options="field:'ck',width:20,checkbox:true"></th>
+				<th data-options="field:'id',width:1,hidden:true">ID</th>
+				<th data-options="field:'name',width:120">监控名称</th>
+				<th data-options="field:'udn',width:100">监控号码</th>
+				<th data-options="field:'orgid',align:'right',hidden:true,width:1">隶属组织ID</th>
+				<th data-options="field:'orgName',align:'right',hidden:true,width:5">监控位置</th>
+				<th data-options="field:'longitude',align:'right',width:100">经度</th>
+				<th data-options="field:'latitude',align:'right',width:100">纬度</th>
+				<th data-options="field:'gpsType',align:'right',width:70"
+					formatter="formatterGpsType">位置</th>
+				<th data-options="field:'voiceUploadFlag',align:'center',width:70"
+					formatter="formatterYesNo">语音上传</th>
+				<th data-options="field:'voicePlayFlag',align:'center',width:70"
+					formatter="formatterYesNo">语音播放</th>
+				<th data-options="field:'ptzFlag',align:'center',width:70"
+					formatter="formatterYesNo">云台控制</th>
+			</tr>
+		</thead>
+	</table>
+</div>
+<div id="config_dlg-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton c6"
+		iconCls="icon-ok" onclick="saveConfig()" style="width: 90px">保存设置</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton"
+		iconCls="icon-cancel"
+		onclick="javascript:$('#config_dialog').dialog('close')"
+		style="width: 90px">取消</a>
+</div>
+<!-- 配置IPC END -->
+
+<script type="text/javascript">
+	$(function() {
+		//扩展easyui表单的验证  
+		$.extend($.fn.validatebox.defaults.rules, {
+			//udn 
+			udn : {
+				validator : function(value) {
+					var reg = /^[0-9]\d{0,15}$/;
+					return reg.test(value);
+				},
+				message : '监控号码只能是数字[0-9], 长度1-16'
+			}
+		});
+
+		//单击行的时候，将单选按钮设置为选中
+		$('#dg').datagrid({
+			selectOnCheck : $(this).is(':checked')
+		});
+		$('#org_treegrid').treegrid({
+			onClickRow : function(row) {				
+				//下发查询
+				$('#dg').datagrid({
+					url : '/lbs/r/ipc/list',
+					queryParams : {
+						orgid : row.id
+					}
+				});
+			}
+		});		
+		
+		//初次载入
+		$('#dg').datagrid({
+			url:'/lbs/r/ipc/list',
+			queryParams : {
+				orgid : -1,
+				owner : owner
+			}
+		});
+	});
+
+	function refreshTree() {
+		//指向一个不存在节点，刷新默认不选中节点
+		$('#org_treegrid').treegrid('select', -1);
+		//重新加载treegrid的数据  
+		$("#org_treegrid").treegrid('reload');
+		$('#dg').datagrid({
+			url : '/lbs/r/ipc/list',
+			queryParams : {
+				orgid : -1,
+				owner : owner
+			}
+		});
+	}
+
+	function collapseAll() {
+		$('#org_treegrid').treegrid('collapseAll');
+	}
+	function expandAll() {
+		$('#org_treegrid').treegrid('expandAll');
+	}
+
+	function formatterGpsType(val, row) {
+		if (val == 0) {
+			return '固定';
+		} else {
+			return '<font color="red">移动</font>';
+		}
+	}
+
+	function formatterYesNo(val, row) {
+		if (val == 0) {
+			return '否';
+		} else {
+			return '<font color="green">是</font>';
+		}
+	}
+
+	function unselectedRowsTips() {
+		$.messager.show({
+			title : '系统消息',
+			msg : '请选择一个条记录后再进行操作'
+		});
+	}
+
+	function configIpc() {
+		var node = $('#org_treegrid').treegrid('getSelected');
+		if (node && node.id) {
+			$('#config_dg').datagrid({
+				selectOnCheck : $(this).is(':checked')
+			});
+			$('#config_dg').datagrid({
+				url : '/lbs/r/ipc/list?owner='+owner
+			});
+			$("#config_dg").datagrid('reload');
+			$('#config_dialog').dialog('open').dialog('center').dialog(
+					'setTitle', 'IPC配置');
+			$("#config_dg").datagrid('getPager').pagination({
+				showPageList : false
+			});
+		} else {
+			unselectedRowsTips();
+		}
+	}
+
+	function newIpc() {
+		$('#my_form').form('clear');
+		$('#dlg').dialog('open').dialog('center').dialog('setTitle', '新增IPC信息');
+	}
+
+	function delIpc() {
+		var node = $('#dg').datagrid('getSelected');
+		if (node) {
+			$.messager.confirm('系统提示', node.name + ', 确定要删除吗 ?', function(r) {
+				if (r) {
+					$.ajax({
+						type : "post",
+						url : "/lbs/r/ipc/del/" + node.id,
+						beforeSend : function() {
+
+						},
+						success : function(result) {
+							var rowindex = $('#dg').datagrid('getRowIndex',
+									node);
+							$('#dg').datagrid('deleteRow', rowindex);
+							$.messager.show({
+								title : '系统消息',
+								msg : '删除成功'
+							});
+						},
+						error : function(result) {
+							$.messager.alert('系统消息', result.msg, 'error');
+						},
+						complete : function() {
+
+						}
+					});
+				}
+			});
+		} else {
+			//如果是checkbox选择删除
+			var checkedItems = $('#dg').datagrid('getChecked');
+			var ids = "";
+			$.each(checkedItems, function(index, item) {
+				ids += item.id + ",";
+			});
+			if (ids.length > 0) {
+				$.messager.confirm('系统提示', '确定要删除选中的记录吗 ?', function(r) {
+					if (r) {
+						$.ajax({
+							type : "post",
+							url : "/lbs/r/ipc/del",
+							data : {
+								"ids" : ids
+							},
+							dataType : 'json',
+							beforeSend : function() {
+
+							},
+							success : function(result) {
+								$("#dg").datagrid('reload');
+								$.messager.show({
+									title : '系统消息',
+									msg : '删除成功'
+								});
+							},
+							error : function(result) {
+								$.messager.alert('系统消息', '出错了!' + result.msg,
+										'error');
+							},
+							complete : function() {
+
+							}
+						});
+					}
+				});
+			} else {
+				unselectedRowsTips();
+			}
+		}
+	}
+
+	function loadFormData() {
+		var node = $('#dg').datagrid('getSelected');
+		if (node) {
+			$('#my_form').form('load', {
+				ipcid : node.id,
+				orgid : node.orgid,
+				owner : node.owner,
+				name : node.name,
+				udn : node.udn,
+				longitude : node.longitude,
+				latitude : node.latitude,
+				gpsType : node.gpsType,
+				voiceUploadFlag : node.voiceUploadFlag,
+				voicePlayFlag : node.voicePlayFlag,
+				ptzFlag : node.ptzFlag
+			});
+			if (node.gpsType == 1)
+				$('#gpsType').switchbutton("check");
+			if (node.voiceUploadFlag == 1)
+				$('#voiceUploadFlag').switchbutton("check");
+			if (node.voicePlayFlag == 1)
+				$('#voicePlayFlag').switchbutton("check");
+			if (node.ptzFlag == 1)
+				$('#ptzFlag').switchbutton("check");
+			$('#dlg').dialog('open').dialog('center').dialog('setTitle',
+					'修改IPC信息');
+		} else {
+			unselectedRowsTips();
+		}
+	}
+
+	function saveConfig() {
+		var checkedItems = $('#config_dg').datagrid('getChecked');
+		var node = $('#org_treegrid').treegrid('getSelected');
+		var orgid = node.id;
+		var owner = node.owner;
+		var ids = "";
+		$.each(checkedItems, function(index, item) {
+			ids += item.id + ",";
+		});
+		if (ids.length > 0) {
+			$.ajax({
+				type : "post",
+				url : "/lbs/r/ipc/config",
+				data : {
+					"ids" : ids,
+					"orgid" : orgid,
+					"owner" : owner
+				},
+				dataType : 'json',
+				beforeSend : function() {
+
+				},
+				success : function(result) {
+					if (result.result == 1) {
+						$("#dg").datagrid('reload');
+						$.messager.show({
+							title : '系统消息',
+							msg : result.msg
+						});
+						$('#config_dialog').dialog('close');
+					} else {
+						$.messager.alert('系统消息', '出错了，' + result.msg, 'error');
+					}
+				},
+				error : function(result) {
+					$.messager.alert('系统消息', '出错了!' + result.msg, 'error');
+				},
+				complete : function() {
+
+				}
+			});
+		}
+	}
+	//将IPC的组织信息移除
+	function undoIpc() {
+		var checkedItems = $('#dg').datagrid('getChecked');
+		var ids = "";
+		$.each(checkedItems, function(index, item) {
+			ids += item.id + ",";
+		});
+		if (ids.length > 0) {
+			$.messager.confirm('系统提示', '确定要移除选中的IPC组织信息 ?', function(r) {
+				if (r) {
+					$.ajax({
+						type : "post",
+						url : "/lbs/r/ipc/undo",
+						data : {
+							"ids" : ids
+						},
+						dataType : 'json',
+						beforeSend : function() {
+
+						},
+						success : function(result) {
+							if (result.result == 1) {
+								$("#dg").datagrid('reload');
+								$.messager.show({
+									title : '系统消息',
+									msg : result.msg
+								});
+							} else {
+								$.messager.alert('系统消息', '出错了，' + result.msg, 'error');
+							}							
+						},
+						error : function(result) {
+							$.messager.alert('系统消息', result.responseText,
+									'error');
+						},
+						complete : function() {
+
+						}
+					});
+				}
+			});
+		}
+	}
+
+	function saveOrUpdate() {
+		if ($("#my_form").form('validate')) {
+			var id = $("#ipcid").val();
+			var name = $("#name").val();
+			var orgid = $("#orgid").val();
+			var owner = $("#owner").val();
+			var udn = $("#udn").val();
+			var longitude = $("#longitude").val();
+			var latitude = $("#latitude").val();
+			var gpsType = $("#gpsType").switchbutton("options").checked ? 1 : 0;
+			var voiceUploadFlag = $("#voiceUploadFlag").switchbutton("options").checked ? 1
+					: 0;
+			var voicePlayFlag = $("#voicePlayFlag").switchbutton("options").checked ? 1
+					: 0;
+			var ptzFlag = $("#ptzFlag").switchbutton("options").checked ? 1 : 0;
+			//若是选中某一组织，则默认将IPC添加至该组织
+			var node = $('#org_treegrid').treegrid('getSelected');
+			if (node) {
+				orgid = node.id;
+			}
+			$.ajax({
+				type : "post",
+				url : "/lbs/r/ipc/append",
+				data : {
+					"id" : id,
+					"name" : name,
+					"udn" : udn,
+					"longitude" : longitude,
+					"latitude" : latitude,
+					"gpsType" : gpsType,
+					"voiceUploadFlag" : voiceUploadFlag,
+					"voicePlayFlag" : voicePlayFlag,
+					"ptzFlag" : ptzFlag,
+					"orgid" : orgid,
+					"owner" : owner
+				},
+				dataType : 'json',
+				beforeSend : function() {
+
+				},
+				success : function(result) {
+					if (result.result == 1) {
+						$('#dlg').dialog('close');
+						$("#dg").datagrid('reload');
+						$.messager.show({
+							title : '系统消息',
+							msg : '操作成功'
+						});
+					} else {
+						$.messager.alert('系统消息', '出错了，' + result.msg, 'error');
+					}
+				},
+				error : function(result) {
+					$.messager.alert('系统消息', '出错了!' + result.msg, 'error');
+				},
+				complete : function() {
+
+				}
+			});
+		}
+	}
+</script>

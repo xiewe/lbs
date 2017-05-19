@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=yes" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>google map v3测距</title>
+<script type="text/javascript"
+	src="https://maps.google.com/maps/api/js?sensor=true"></script>
+
+<script type="text/javascript">
+	var map;
+	var polyline;
+	var polylinesArray = [];
+	//距离标记数组  
+	var lenArray = [];
+	//默认经纬度  22.786607, 100.977316  
+	var DefaultLat = 22.51118;
+	var DefaultLng = 113.92505;
+	//缩放级别  
+	var DefaultZoom = 15; //默认情况下的zoom  
+
+	//地图初始化  
+	function MapInit() {
+		var singapoerCenter = new google.maps.LatLng(DefaultLat, DefaultLng); //设置中心位置  
+		var myOptions = {
+			zoom : DefaultZoom,
+			center : singapoerCenter,
+			//平移控件  
+			navigationControl : true,
+			//比例尺控件  
+			scaleControl : true,
+			//街道视图控件  
+			streetViewControl : true,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		};
+		map = new google.maps.Map(document.getElementById("map"), myOptions);
+
+		//为地图的缩放事件提供监听器  
+		//当地图缩放级别小于默认缩放级别时回到当前设定缩放级别和原点  
+		google.maps.event.addListener(map, 'zoom_changed', function() {
+			if (this.getZoom() < DefaultZoom) {
+				CreateMarker(DefaultLat, DefaultLng, DefaultZoom);
+			}
+		});
+
+		var measureControlDiv = document.createElement('DIV');
+		var measureControl = new MeasureControl(measureControlDiv, map);
+
+		measureControlDiv.index = 1;
+		map.controls[google.maps.ControlPosition.TOP_RIGHT]
+				.push(measureControlDiv);
+
+		getDistance();
+	}
+
+	//创建标记  
+	function CreateMarker(lat, lng, MyGoToCommunityZoom) {
+		var singapoerCenter = new google.maps.LatLng(lat, lng);
+		var myOptions = {
+			zoom : MyGoToCommunityZoom,
+			center : singapoerCenter,
+			navigationControl : true,
+			scaleControl : true,
+			streetViewControl : true,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		}
+		map.setOptions(myOptions);
+	}
+
+	//距离  
+	function getDistance() {
+		google.maps.event.addListener(map, "click", function(event) {
+			addMarker(event.latLng);
+		});
+	}
+
+	function MeasureControl(controlDiv, map) {
+
+		// Set CSS styles for the DIV containing the control
+		// Setting padding to 5 px will offset the control
+		// from the edge of the map
+		controlDiv.style.padding = '8px';
+
+		// Set CSS for the control border
+		var measureControlUI = document.createElement('DIV');
+		measureControlUI.style.backgroundColor = 'white';
+		measureControlUI.style.float = 'left';
+		measureControlUI.style.borderStyle = 'solid';
+		measureControlUI.style.borderWidth = '1px';
+		measureControlUI.style.cursor = 'pointer';
+		measureControlUI.style.textAlign = 'center';
+		measureControlUI.style.fontSize = '12px';
+		measureControlUI.style.padding = '2px';
+		measureControlUI.innerHTML = '<img style="vertical-align:middle;padding-left:2px;padding-right:2px;" src="measure.png" /><span style="padding-right:2px;">测距</span>';
+		measureControlUI.title = 'Click to set the map to Home';
+
+		controlDiv.appendChild(measureControlUI);
+
+		// Set CSS for the control border
+		var markerControlUI = document.createElement('DIV');
+		markerControlUI.style.backgroundColor = 'white';
+		markerControlUI.style.float = 'left';
+		markerControlUI.style.marginLeft = '4px';
+		markerControlUI.style.borderStyle = 'solid';
+		markerControlUI.style.borderWidth = '1px';
+		markerControlUI.style.cursor = 'pointer';
+		markerControlUI.style.textAlign = 'center';
+		markerControlUI.style.fontSize = '12px';
+		markerControlUI.style.padding = '2px';
+		markerControlUI.innerHTML = '<img style="vertical-align:middle;padding-left:2px;padding-right:2px;" src="maker.png" /><span style="padding-right:2px;">标记</span>';
+		markerControlUI.title = 'Click to set the map to Home';
+
+		controlDiv.appendChild(markerControlUI);
+
+		// Setup the click event listeners: simply set the map to
+		// Chicago
+		google.maps.event.addDomListener(measureControlUI, 'click', function() {
+			map.setCenter(chicago)
+		});
+	}
+
+	//添加新标记  
+	function addMarker(location) {
+
+		if (lenArray.length == 0) {
+			var icon = "https://www.google.com/mapfiles/dd-start.png";
+		} else {
+			if (lenArray.length >= 2) {
+				marker.setMap(null);
+			}
+			var icon = "https://maps.gstatic.com/mapfiles/ridefinder-images/mm_20_red.png";
+		}
+		//标记选项  
+		var myOptions = {
+			position : location,
+			draggable : true,
+			map : map,
+			icon : icon
+		};
+		marker = new google.maps.Marker(myOptions);
+		//双击  
+		google.maps.event.addListener(marker, 'click', function() {
+			//放入marker  
+			lenArray.push(marker);
+			drawOverlay();
+		});
+		//拖动结束事件  
+		google.maps.event.addListener(marker, 'dragend', function() {
+			lenArray.push(marker);
+			drawOverlay();
+		});
+		lenArray.push(marker);
+		drawOverlay();
+	}
+
+	//画出路径覆盖层  
+	function drawOverlay() {
+		//路线数组  
+		var flightPlanCoordinates = [];
+		//  
+		//将坐标压入路线数组  
+		if (lenArray) {
+			for (i in lenArray) {
+				flightPlanCoordinates.push(lenArray[i].getPosition());
+			}
+		}
+		//路径选项  
+		var myOptions = {
+			path : flightPlanCoordinates,
+			map : map,
+			strokeColor : "#FF0000",
+			strokeOpacity : 1.0,
+			strokeWeight : 2
+		};
+		polyline = new google.maps.Polyline(myOptions);
+		//清除原有折线路径  
+		if (polylinesArray) {
+			for (i in polylinesArray) {
+				polylinesArray[i].setMap(null);
+			}
+			polylinesArray = [];
+		}
+		polyline.setMap(map);
+
+		document.getElementById("sRes").innerHTML = (polyline.getLength() / 1000)
+				.toFixed(3);
+		polylinesArray.push(polyline);
+	}
+
+	///距离算法  
+	google.maps.LatLng.prototype.distanceFrom = function(latlng) {
+		var lat = [ this.lat(), latlng.lat() ]
+		var lng = [ this.lng(), latlng.lng() ] //var R = 6371; // km (change this constant to get miles)  
+		var R = 6378137; // In meters  
+		var dLat = (lat[1] - lat[0]) * Math.PI / 180;
+		var dLng = (lng[1] - lng[0]) * Math.PI / 180;
+		var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+				+ Math.cos(lat[0] * Math.PI / 180)
+				* Math.cos(lat[1] * Math.PI / 180) * Math.sin(dLng / 2)
+				* Math.sin(dLng / 2);
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		var d = R * c;
+		return Math.round(d);
+	}
+	// //  
+	google.maps.Marker.prototype.distanceFrom = function(marker) {
+		return this.getPosition().distanceFrom(marker.getPosition());
+	}
+	// //  
+	google.maps.Polyline.prototype.getLength = function() {
+		var d = 0;
+		var path = this.getPath();
+		var latlng;
+		for (var i = 0; i < path.getLength() - 1; i++) {
+			latlng = [ path.getAt(i), path.getAt(i + 1) ];
+			d += latlng[0].distanceFrom(latlng[1]);
+		}
+		return d;
+	}
+
+	// 删除所有叠加物   
+	function deleteOverlays() {
+		if (lenArray) {
+			for (i in lenArray) {
+				lenArray[i].setMap(null);
+			}
+			lenArray.length = 0;
+		}
+
+		//清除原有折线路径  
+		if (polylinesArray) {
+			for (i in polylinesArray) {
+				polylinesArray[i].setMap(null);
+			}
+			polylinesArray = [];
+		}
+		document.getElementById("sRes").innerHTML = "0.000";
+	}
+
+	function MyControl() {
+	}
+	MyControl.prototype = new GControl();
+	MyControl.prototype.initialize = function(map) {
+		this.map = map;
+		var container = map.getContainer();
+		var label = document.createElement("div");
+		container.appendChild(label);
+		lable.innerHTML = "Hello World";
+		return label;
+	}
+	MyControl.prototype.getDefaultPosition = function() {
+		return new GControlPosition(G_ANCHOR_TOP_LEFT, new GSize(50, 10));
+	}
+</script>
+
+</head>
+<body onload="MapInit()">
+	<div>
+		<div id="search_box" class="search_box">
+
+			<div id="busSearchBox">
+				<span id="Span1" style="margin-left: 30px;">点击地图可跟踪您要测量的路线. <input
+					type="button" id="delMarker" onclick="deleteOverlays();" 
+					value="清除标记" class="inputBtn" /> 距离：<span id="sRes">0.000</span>km
+				</span>
+			</div>
+		</div>
+		<div id="map" style="width: 100%; height: 700px"></div>
+	</div>
+</body>
+</html>

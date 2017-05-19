@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>信威LBS</title>
+	<link rel="stylesheet" type="text/css" href="themes/easyui/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="themes/easyui/themes/icon.css">
+	<link rel="stylesheet" type="text/css" href="themes/easyui/demo/demo.css">
+	<script type="text/javascript" src="themes/easyui/jquery.min.js"></script>
+	<script type="text/javascript" src="themes/easyui/jquery.easyui.min.js"></script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height:60px;background:#B3DFDA;padding:10px">north region</div>
+	<div data-options="region:'west',split:true,hideCollapsedContent:false,title:'导航菜单'" style="width:200px;">
+		<div class="easyui-accordion" data-options="fit:true,border:false">
+			<div title="组织管理" style="padding:10px;" data-options="selected:true,iconCls:'icon-man'" >
+				content1
+			</div>
+			<div title="IPC配置" style="padding:10px;" data-options="iconCls:'icon-sum'">
+				content2
+			</div>
+		</div>
+	</div>
+	<div data-options="region:'east',split:true,hideCollapsedContent:false,collapsed:true,title:'控制面板'" style="width:100px;padding:10px;">east region</div>
+	<div data-options="region:'south',border:false" style="height:50px;background:#A9FACD;padding:10px;">south region</div>
+	<div data-options="region:'center',title:'Center'"></div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Google Maps v3 画线--左键描点、右键停止画线</title>
+<script type="text/javascript" src="conf.txt"></script>
+<script type="text/javascript" src="mapfiles/mapapi.js"></script>
+<script type="text/javascript" src="js/markerwithlabel.js"></script>
+<script type="text/javascript" src="js/keydragzoom.js"></script>
+<script type="text/javascript" src="js/gps.js"></script>
+<script type="text/javascript" src="js/json.js"></script>
+<script type="text/javascript" src="js/model.js"></script>
+<script type="text/javascript" src="js/maputil.js"></script>
+<script type="text/javascript" src="js/service.js"></script>
+<script type="text/javascript" src="js/infobubble.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/customMarker.js"></script>
+<script type="text/javascript" src="js/customMeasure.js"></script>
+
+<link type="text/css" rel="stylesheet" href="css/xwmap.css" />
+<style type="text/css">
+.labels {
+	color: red;
+	background-color: white;
+	font-family: "Lucida Grande", "Arial", sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	text-align: center;
+	padding: 0px 0.2em 0px 0.2em;
+	border: 1px solid black;
+	white-space: nowrap;
+}
+</style>
+
+<script type="text/javascript">
+	
+	function initialize() {		
+		createXinWeiMap();
+		google.maps.event.addListener(map, 'rightclick', complete);
+		//添加自定义工具菜单
+		var myControlDiv = document.createElement('DIV');
+		var measureControl = new MyControl(myControlDiv, map);
+		myControlDiv.index = 1;
+		map.controls[google.maps.ControlPosition.TOP_RIGHT].push(myControlDiv);
+	
+		//加载自定义标记
+		setTimeout(drawCustomMarkers, 500);
+	}
+
+</script>
+</head>
+<body onload="initialize()">
+	<div id="map_canvas" style="width: 100%; height: 700px"></div>
+</body>
+</html>
